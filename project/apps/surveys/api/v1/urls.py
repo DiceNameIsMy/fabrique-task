@@ -17,22 +17,6 @@ from apps.surveys.api.v1.views import (
     SurveyStartView,
 )
 
-"""
-
-admin:
-CRUD surveys, survey start_date is not mutable
-CRUD survey questions and answers
-
-users:
-get all active surveys
-take a survey(only active)
-    anonymously or add respondent relation
-    return survey form id after completion
-
-get survey form details by id
-
-
-"""
 urlpatterns = [
     path('surveys/', include([
         path('', SurveyListCreateView.as_view(), name='all_surveys'),

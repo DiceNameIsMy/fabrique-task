@@ -44,6 +44,8 @@ class CreateRetrieveUpdateDestroyAPIView(
 
 
 class SurveyListCreateView(ListCreateAPIView):
+    """ Show all or Create Survey
+    """
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     serializer_class = SurveySerializer
@@ -51,6 +53,8 @@ class SurveyListCreateView(ListCreateAPIView):
 
 
 class ActiveSurveyListView(ListAPIView):
+    """ Show all active surveys
+    """
     serializer_class = SurveySerializer
     queryset = Survey.objects.all()
 
@@ -58,6 +62,8 @@ class ActiveSurveyListView(ListAPIView):
 
 
 class SurveyRUDView(RetrieveUpdateDestroyAPIView):
+    """ Change survey
+    """
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     serializer_class = SurveySerializer
@@ -65,6 +71,8 @@ class SurveyRUDView(RetrieveUpdateDestroyAPIView):
 
 
 class SurveyQuestionsListCreateView(ListCreateAPIView):
+    """ Show all or Create Question for survey
+    """
     permission_classes = (IsAdminOrReadOnly, )
 
     serializer_class = QuestionSerializer
@@ -76,11 +84,15 @@ class SurveyQuestionsListCreateView(ListCreateAPIView):
 
 
 class SurveyStartView(CreateAPIView):
+    """ Start a survey
+    """
     serializer_class = FormCreateSerizlier
     queryset = Form.objects.all()
 
 
 class FormAnswerListView(ListAPIView):
+    """ Show all answers of current form
+    """
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     serializer_class = FormAnswerSerializer
@@ -88,11 +100,15 @@ class FormAnswerListView(ListAPIView):
 
 
 class FormAnswerRUDView(RetrieveUpdateDestroyAPIView):
+    """ Change answer
+    """
     serializer_class = FormAnswerSerializer
     queryset = FormAnswer.objects.all()
 
 
 class FormListView(ListCreateAPIView):
+    """ Show all forms
+    """
     permission_classes = (IsAdminUser, )
 
     serializer_class = FormSerializer
@@ -100,11 +116,15 @@ class FormListView(ListCreateAPIView):
 
 
 class FormRetrieveView(RetrieveAPIView):
+    """ Get form detail
+    """
     serializer_class = FormSerializer
     queryset = Form.objects.all()
 
 
 class FormRespondent(CreateRetrieveUpdateDestroyAPIView):
+    """ Create or change respondent
+    """
     serializer_class = RespondentSerializer
     
     def get_object(self):
@@ -114,6 +134,8 @@ class FormRespondent(CreateRetrieveUpdateDestroyAPIView):
 
 
 class FormSurveyRetrieveView(RetrieveAPIView):
+    """ View survey of current form
+    """
     serializer_class = SurveySerializer
     
     def get_object(self):
@@ -123,6 +145,8 @@ class FormSurveyRetrieveView(RetrieveAPIView):
 
 
 class FormSurveyQuestionsListView(ListAPIView):
+    """ View questions of survey of current form
+    """
     serializer_class = QuestionSerializer
     queryset = Question.objects.all()
     
@@ -132,6 +156,8 @@ class FormSurveyQuestionsListView(ListAPIView):
 
 
 class FormAnswerListCreateView(ListCreateAPIView):
+    """ Show all form answers or create (one or many are avaliable)
+    """
     serializer_class = FormAnswerCreateSerializer
     queryset = FormAnswer.objects.all()
 
@@ -146,6 +172,8 @@ class FormAnswerListCreateView(ListCreateAPIView):
 
 
 class SubmitFormView(UpdateAPIView):
+    """ Submit form
+    """
     serializer_class = SubmitFormSerializer
     queryset = Form.objects.all()
 
