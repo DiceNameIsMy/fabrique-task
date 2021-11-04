@@ -61,7 +61,7 @@ class Respondent(models.Model):
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128)
     age = models.PositiveSmallIntegerField()
-    # O2O forms
+    # O2O form
 
     def __str__(self) -> str:
         return f'{self.first_name} {self.last_name}, {self.age}'
@@ -78,7 +78,7 @@ class Form(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='forms'
+        related_name='form'
     )
     survey = models.ForeignKey(
         to=Survey,
