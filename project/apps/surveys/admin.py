@@ -9,6 +9,10 @@ from .models import (
     FormAnswer
 )
 
+class QuestionInline(admin.TabularInline):
+    model = Question
+    extra = 0
+
 class AnswerInline(admin.TabularInline):
     model = Answer
     extra = 0
@@ -20,7 +24,8 @@ class FormAnswerInline(admin.TabularInline):
 
 @admin.register(Survey)
 class SurveyAdmin(admin.ModelAdmin):
-    pass
+    inlines = [QuestionInline]
+
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):

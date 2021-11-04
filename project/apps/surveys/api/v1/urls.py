@@ -1,10 +1,18 @@
 from django.urls import path, include
 
 from apps.surveys.api.v1.views import (
+    FormAnswerListCreateView,
+    FormRespondent,
+    FormSurveyQuestionsListView,
+    FormSurveyRetrieveView,
+    SubmitFormView,
     SurveyListCreateView,
     ActiveSurveyListView,
     SurveyQuestionsListCreateView,
-    SurveyRUDView
+    SurveyRUDView,
+    FormListView,
+    FormRetrieveView,
+    SurveyStartView,
 )
 
 """
@@ -32,7 +40,7 @@ urlpatterns = [
         path('<int:pk>/questions/', SurveyQuestionsListCreateView.as_view(), name='survey_questions'),
         # # TODO endpoint to get stats about a survey
 
-        # path('<int:pk>/start/', name='start_survey'),
+        path('<int:pk>/start/', SurveyStartView.as_view(), name='start_survey'),
 
     ])),
 
@@ -47,17 +55,17 @@ urlpatterns = [
     #     path('<int:pk>/', name='answer_detail'),
     # ])),
 
-    # path('forms/', include([
-    #     path('', name='all_forms'),
-    #     path('<int:pk>/', name='form_detail'),
-    #     path('<int:pk>/respondent/', name='form_respondent'),
+    path('forms/', include([
+        path('', FormListView.as_view(), name='all_forms'),
+        path('<slug:pk>/', FormRetrieveView.as_view(), name='form_detail'),
+        path('<slug:pk>/respondent/', FormRespondent.as_view(), name='form_respondent'),
 
-    #     path('<int:pk>/survey/', name='form_survey'),
-    #     path('<int:pk>/survey/questions/', name='form_survey_questions'),
+        path('<slug:pk>/survey/', FormSurveyRetrieveView.as_view(), name='form_survey'),
+        path('<slug:pk>/survey/questions/', FormSurveyQuestionsListView.as_view(), name='form_survey_questions'),
 
-    #     path('<int:pk>/answers/', name='form_answers'),
+        path('<slug:pk>/answers/', FormAnswerListCreateView.as_view(), name='form_answers'),
 
-    #     path('<int:pk>/submit/', name='form_submit'),
-    # ])),
+        path('<slug:pk>/submit/', SubmitFormView.as_view(), name='form_submit'),
+    ])),
 
 ]

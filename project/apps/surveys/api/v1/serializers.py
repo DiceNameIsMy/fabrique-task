@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.utils import timezone
 
 from rest_framework import serializers
 
@@ -74,7 +75,40 @@ class AnswerSerializer(serializers.ModelSerializer):
 class RespondentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Respondent
-        fields = ('pk', 'first_name', 'last_name', 'age')
+        fields = ('pk', 'first_name', 'last_name', 'age', 'form')
+
+    def to_internal_value(self, data):
+        view = self.context['view']
+        lookup_field = view.lookup_url_kwarg or view.lookup_field
+
+        data = data.copy()
+        data['form'] = view.kwargs[lookup_field]
+        return super().to_internal_value(data)
+
+    def save(self, **kwargs):
+        # OneToOne form field doesn's save correctly 
+        # for some reason so i made it this way
+        form = self.validated_data.pop('form')
+        respondent = super().save(**kwargs)
+        form.respondent = respondent
+        form.save()
+        return respondent
+
+
+class FormCreateSerizlier(serializers.ModelSerializer):
+    class Meta:
+        model = Form
+        fields = (
+            'pk', 'survey'
+        )   
+
+    def to_internal_value(self, data):
+        view = self.context['view']
+        lookup_field = view.lookup_url_kwarg or view.lookup_field
+
+        data = data.copy()
+        data['survey'] = view.kwargs[lookup_field]
+        return super().to_internal_value(data)
 
 
 class FormSerializer(serializers.ModelSerializer):
@@ -94,4 +128,40 @@ class FormAnswerSerializer(serializers.ModelSerializer):
             'text', 'choice', 'choices'
         )
 
+    def to_internal_value(self, data):
+        view = self.context['view']
+        lookup_field = view.lookup_url_kwarg or view.lookup_field
+
+        data = data.copy()
+        data['form'] = view.kwargs[lookup_field]
+        return super().to_internal_value(data)
+
+
+class SubmitFormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Form
+        fields = ('pk',)
+
+    def validate(self, attrs):
+        form = self.instance
+        if form.submitted:
+            raise serializers.ValidationError(
+                'form is already submitted'
+            )
+
+        form_answers = form.answers.all()
+        form_survey_questions = form.survey.questions.all()
+        unanswered_questions_amount = len(form_survey_questions) - len(form_answers)
+        if unanswered_questions_amount:
+            raise serializers.ValidationError(
+                f'survey form should answer to all questions. {unanswered_questions_amount} left.'
+            )
+
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance.submitted = True
+        instance.submitted_date = timezone.now()
+        instance.save()
+        return instance
 
