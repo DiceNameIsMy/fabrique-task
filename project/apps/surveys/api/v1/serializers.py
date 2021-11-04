@@ -135,18 +135,10 @@ class FormAnswerSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def to_internal_value(self, data):
-        view = self.context['view']
-        lookup_field = view.lookup_url_kwarg or view.lookup_field
-
-        data = data.copy()
-        data['form'] = view.kwargs[lookup_field]
-        return super().to_internal_value(data)
-    
     def validate(self, attrs):
         # TODO improve this ass long validation
-        form = attrs['form']
-        question = attrs['question']
+        form = attrs.get('form') or getattr(self.instance, 'form')
+        question = attrs.get('question') or getattr(self.instance, 'question')
 
         if form.submitted:
             raise serializers.ValidationError(
@@ -156,49 +148,76 @@ class FormAnswerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'answer to question should be in survey'
             )
-        
 
-        text = attrs.get('text')
-        choice = attrs.get('choice')
-        choices = attrs.get('choices')
+        text = attrs.get('text') or getattr(self.instance, 'text')
+        choice = attrs.get('choice') or getattr(self.instance, 'choice')
+        if self.instance:
+            choices = self.instance.choices.all()
+        else:
+            choices = attrs.get('choices')
 
         if question.type == Question.TEXT:
-            if not text:
-                raise serializers.ValidationError(
-                    '`text` field is required' 
-                )
-            if choice or choices:
-                raise serializers.ValidationError(
-                    'only `text` field is allowed for this question' 
-                )
-        if question.type == Question.CHOICE:
-            if not choice:
-                raise serializers.ValidationError(
-                    '`choice` field is required' 
-                )
-            if choice not in question.answers.all():
-                raise serializers.ValidationError(
-                    '`choice` should be in question choices' 
-                )
-            if text or choices:
-                raise serializers.ValidationError(
-                    'only `choice` field is allowed for this question' 
-                )
-        if question.type == Question.CHECKBOX:
-            if not choices:
-                raise serializers.ValidationError(
-                    '`choices` field is required' 
-                )
-            if set(choices) - set(question.answers.all()):
-                raise serializers.ValidationError(
-                    '`choices` should be in question choices' 
-                )
-            if text or choice:
-                raise serializers.ValidationError(
-                    'only `choices` field is allowed for this question' 
-                )
-
+           self.validate_text_type(attrs, text)
+        elif question.type == Question.CHOICE:
+            self.validate_choice_type(attrs, choice)
+        elif question.type == Question.CHECKBOX:
+            self.validate_choices_type(attrs, choices)
+        
         return attrs
+
+
+    def validate_text_type(self, attrs, text):
+        if not text:
+            raise serializers.ValidationError(
+                '`text` field is required' 
+            )
+            
+    def validate_choice_type(self, attrs, choice):
+        question = attrs.get('question') or getattr(self.instance, 'question')
+        if not choice:
+            raise serializers.ValidationError(
+                '`choice` field is required' 
+            )
+        if choice not in question.answers.all():
+            raise serializers.ValidationError(
+                '`choice` should be in question choices' 
+            )
+
+    def validate_choices_type(self, attrs, choices):
+        question = attrs.get('question') or getattr(self.instance, 'question')
+        if not choices:
+            raise serializers.ValidationError(
+                '`choices` field is required' 
+            )
+        if set(choices) - set(question.answers.all()):
+            raise serializers.ValidationError(
+                '`choices` should be in question choices' 
+            )
+
+
+
+class FormAnswerCreateSerializer(FormAnswerSerializer):
+    class Meta:
+        model = FormAnswer
+        fields = (
+            'pk', 'form', 'question', 
+            'text', 'choice', 'choices'
+        )
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('form', 'question'),
+                message='form should have only one answer per question'
+            )
+        ]
+
+    def to_internal_value(self, data):
+        view = self.context['view']
+        lookup_field = view.lookup_url_kwarg or view.lookup_field
+
+        data = data.copy()
+        data['form'] = view.kwargs[lookup_field]
+        return super().to_internal_value(data)
 
 
 class SubmitFormSerializer(serializers.ModelSerializer):

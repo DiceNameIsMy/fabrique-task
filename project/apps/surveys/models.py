@@ -119,6 +119,9 @@ class FormAnswer(models.Model):
         max_length=512,
         blank=True
     )
+    # TODO rename related names for 
+    # `choice` and `choices` fields
+    
     # Used if question type is CHOICE
     choice = models.ForeignKey(
         to=Answer,

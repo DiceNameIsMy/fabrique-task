@@ -25,6 +25,8 @@ from apps.surveys.permissions import IsAdminOrCreateOnly, IsAdminOrReadOnly
 from apps.surveys.filters import ActiveSurveysFilter
 from apps.utils.filters import URLRelatedFilter
 from .serializers import (
+    AnswerSerializer,
+    FormAnswerCreateSerializer,
     FormCreateSerizlier,
     RespondentSerializer,
     SubmitFormSerializer,
@@ -78,6 +80,18 @@ class SurveyStartView(CreateAPIView):
     queryset = Form.objects.all()
 
 
+class FormAnswerListView(ListAPIView):
+    permission_classes = (IsAuthenticated, IsAdminUser)
+
+    serializer_class = FormAnswerSerializer
+    queryset = FormAnswer.objects.all()
+
+
+class FormAnswerRUDView(RetrieveUpdateDestroyAPIView):
+    serializer_class = FormAnswerSerializer
+    queryset = FormAnswer.objects.all()
+
+
 class FormListView(ListCreateAPIView):
     permission_classes = (IsAdminUser, )
 
@@ -118,12 +132,17 @@ class FormSurveyQuestionsListView(ListAPIView):
 
 
 class FormAnswerListCreateView(ListCreateAPIView):
-    serializer_class = FormAnswerSerializer
+    serializer_class = FormAnswerCreateSerializer
     queryset = FormAnswer.objects.all()
 
     filter_backends = [URLRelatedFilter]
     url_related_field = 'form__pk'
     url_related_kwarg = 'pk'
+
+    def get_serializer(self, *args, **kwargs):
+        if isinstance(self.request.data, list):
+            kwargs['many'] = True
+        return super().get_serializer(*args, **kwargs)
 
 
 class SubmitFormView(UpdateAPIView):
