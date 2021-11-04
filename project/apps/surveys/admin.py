@@ -1,3 +1,36 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import (
+    Survey, 
+    Respondent, 
+    Question,
+    Answer,
+    Form,
+    FormAnswer
+)
+
+class AnswerInline(admin.TabularInline):
+    model = Answer
+    extra = 0
+
+class FormAnswerInline(admin.TabularInline):
+    model = FormAnswer
+    extra = 0
+
+
+@admin.register(Survey)
+class SurveyAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    inlines = [AnswerInline]
+
+
+@admin.register(Respondent)
+class RespondentAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Form)
+class SurveyAdmin(admin.ModelAdmin):
+    inlines = [FormAnswerInline]
