@@ -2,9 +2,9 @@ from django.contrib import admin
 
 from .models import (
     Survey, 
-    Respondent, 
     Question,
     Answer,
+    Respondent, 
     Form,
     FormAnswer
 )

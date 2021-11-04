@@ -1,18 +1,40 @@
 from django.urls import path, include
 
+from apps.surveys.api.v1.views import (
+    SurveyListCreateView,
+    ActiveSurveyListView,
+    SurveyQuestionsListCreateView,
+    SurveyRUDView
+)
 
+"""
+
+admin:
+CRUD surveys, survey start_date is not mutable
+CRUD survey questions and answers
+
+users:
+get all active surveys
+take a survey(only active)
+    anonymously or add respondent relation
+    return survey form id after completion
+
+get survey form details by id
+
+
+"""
 urlpatterns = [
-    # path('surveys/', include([
-    #     path('', name='all_surveys'),
-    #     path('active/', name='all_active_surveys'),
+    path('surveys/', include([
+        path('', SurveyListCreateView.as_view(), name='all_surveys'),
+        path('active/', ActiveSurveyListView.as_view(),  name='all_active_surveys'),
         
-    #     path('<int:pk>/', name='survey_detail'),
-    #     path('<int:pk>/questions/', name='survey_questions'),
-    #     # TODO endpoint to get stats about a survey
+        path('<int:pk>/', SurveyRUDView.as_view(), name='survey_detail'),
+        path('<int:pk>/questions/', SurveyQuestionsListCreateView.as_view(), name='survey_questions'),
+        # # TODO endpoint to get stats about a survey
 
-    #     path('<int:pk>/start/', name='start_survey'),
+        # path('<int:pk>/start/', name='start_survey'),
 
-    # ])),
+    ])),
 
     # path('questions/', include([
     #     path('', name='all_questions'),
