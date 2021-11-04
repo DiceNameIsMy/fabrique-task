@@ -14,6 +14,11 @@ class Survey(models.Model):
         return f'{self.title[:15]}, {self.start_date.date()}'
 
 
+""" I was also considering an alternative implementation
+where every question type would be a spearate model.
+Also the one where similar question types would be merged 
+and have their own types
+"""
 class Question(models.Model):
     TEXT = 1
     CHOICE = 2
