@@ -14,16 +14,6 @@ class Survey(models.Model):
         return f'{self.title[:15]}, {self.start_date.date()}'
 
 
-class Respondent(models.Model):
-    first_name = models.CharField(max_length=128)
-    last_name = models.CharField(max_length=128)
-    age = models.PositiveSmallIntegerField()
-    # FK forms
-
-    def __str__(self) -> str:
-        return f'{self.first_name} {self.last_name}, {self.age}'
-
-
 class Question(models.Model):
     TEXT = 1
     CHOICE = 2
@@ -67,13 +57,23 @@ class Answer(models.Model):
         return self.text[:15]
 
 
+class Respondent(models.Model):
+    first_name = models.CharField(max_length=128)
+    last_name = models.CharField(max_length=128)
+    age = models.PositiveSmallIntegerField()
+    # O2O forms
+
+    def __str__(self) -> str:
+        return f'{self.first_name} {self.last_name}, {self.age}'
+
+
 class Form(models.Model):
     id = models.UUIDField(
         primary_key=True, 
         default=uuid.uuid4, 
         editable=False
     )
-    respondent = models.ForeignKey(
+    respondent = models.OneToOneField(
         to=Respondent,
         on_delete=models.SET_NULL,
         null=True,
