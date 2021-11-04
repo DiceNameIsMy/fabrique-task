@@ -129,5 +129,13 @@ class FormAnswer(models.Model):
         related_name='form_choices'
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['form', 'question'], 
+                name='unique_answer_to_question_in_form'
+            )
+        ]
+
     def __str__(self) -> str:
         return str(self.question)
