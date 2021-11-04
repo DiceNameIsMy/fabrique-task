@@ -1,5 +1,6 @@
 import uuid
 
+from django.utils import timezone
 from django.db import models
 
 
@@ -9,6 +10,13 @@ class Survey(models.Model):
     end_date = models.DateTimeField()
     # FK questions 
     # FK forms
+
+    def is_active(self):
+        current_time = timezone.now()
+        return (
+            self.start_date <= current_time and
+            self.end_date >= current_time
+        )
 
     def __str__(self) -> str:
         return f'{self.title[:15]}, {self.start_date.date()}'
@@ -121,7 +129,7 @@ class FormAnswer(models.Model):
     )
     # TODO rename related names for 
     # `choice` and `choices` fields
-    
+
     # Used if question type is CHOICE
     choice = models.ForeignKey(
         to=Answer,

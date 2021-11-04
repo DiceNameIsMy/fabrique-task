@@ -16,7 +16,7 @@ from apps.surveys.models import (
 class SurveySerializer(serializers.ModelSerializer):
     class Meta:
         model = Survey
-        fields = ('pk', 'title', 'start_date', 'end_date')
+        fields = ('pk', 'title', 'start_date', 'end_date', 'is_active')
 
     def validate(self, attrs):
         if (self.instance is not None) and attrs.get('start_date'):
@@ -110,6 +110,12 @@ class FormCreateSerizlier(serializers.ModelSerializer):
         data['survey'] = view.kwargs[lookup_field]
         return super().to_internal_value(data)
 
+    def validate(self, attrs):
+        if not attrs['survey'].is_active():
+            raise serializers.ValidationError(
+                'survey to take should be active'
+            )
+        return attrs
 
 class FormSerializer(serializers.ModelSerializer):
     class Meta:
