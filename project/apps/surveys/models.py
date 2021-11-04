@@ -48,7 +48,7 @@ class Question(models.Model):
     # FK form_answers
 
     def __str__(self) -> str:
-        return f'{self.type}: {self.text[:15]}'
+        return f'{self.get_type_display()}: {self.text[:15]}'
 
 
 class Answer(models.Model):
@@ -84,6 +84,13 @@ class Form(models.Model):
         to=Survey,
         on_delete=models.CASCADE,
         related_name='forms'
+    )
+    submitted = models.BooleanField(
+        default=False
+    )
+    submitted_date = models.DateTimeField(
+        null=True, 
+        blank=True
     )
     # FK answers
 
