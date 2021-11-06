@@ -1,7 +1,7 @@
 # fabrique-task
 
 ## Setup
-### Devepopment
+### Development
 1. rename `.env.dev-sample` to `.env.dev`
 2. update .env variables and `docker-compose.yml` if you want
 2. run `docker-compose up --build`
