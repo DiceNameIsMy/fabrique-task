@@ -51,15 +51,17 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data: dict):
-        answers = validated_data.pop('answers')
+        answers = validated_data.pop('answers', [])
         question = super().create(validated_data)
-        answers_serializer = _AnswerCreateSerializer(
-            data=answers, 
-            many=True, 
-            context={'question': question}
-        )
-        answers_serializer.is_valid(raise_exception=True)
-        answers_serializer.save()
+        if answers:
+            answers_serializer = _AnswerCreateSerializer(
+                data=answers, 
+                many=True, 
+                context={'question': question}
+            )
+            answers_serializer.is_valid(raise_exception=True)
+            answers_serializer.save()
+
         return question
 
 
