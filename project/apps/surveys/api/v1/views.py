@@ -1,3 +1,5 @@
+from django.http import Http404
+
 from rest_framework.generics import (
     get_object_or_404,
     GenericAPIView,
@@ -40,7 +42,15 @@ class CreateRetrieveUpdateDestroyAPIView(
     RetrieveUpdateDestroyAPIView,
     CreateAPIView
 ):
-    pass
+    def create(self, request, *args, **kwargs):
+        try:
+            self.get_object()
+            return Response(
+                {'detail': 'object already exists'},
+                status=400
+            )
+        except Http404:
+            return super().create(request, *args, **kwargs)
 
 
 class SurveyListCreateView(ListCreateAPIView):
