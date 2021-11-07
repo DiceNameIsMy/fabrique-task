@@ -45,9 +45,18 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ('pk', 'survey', 'type', 'text', 'answers')
 
     def to_internal_value(self, data):
-        data = data.copy()
-        data['survey'] = self.context['view'].kwargs['pk']
+        if not self.instance:
+            data = data.copy()
+            data['survey'] = self.context['view'].kwargs['pk']
         return super().to_internal_value(data)
+
+    def validate(self, attrs):
+        if self.instance:
+            if attrs.get('survey'):
+                raise serializers.ValidationError(
+                    'changing `survey` is not allowed'
+                )
+        return attrs
 
     @transaction.atomic
     def create(self, validated_data: dict):
@@ -69,9 +78,11 @@ class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = (
-            'pk', 'question', 
+            'pk', 'question',
             'text', 'form_choice', 'form_choices'
         )
+        extra_kwargs = {'question': {'required': True}}
+        read_only_fields = ('form_choice', 'form_choices')
 
 
 class RespondentSerializer(serializers.ModelSerializer):

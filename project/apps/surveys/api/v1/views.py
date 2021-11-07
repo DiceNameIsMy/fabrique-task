@@ -53,6 +53,7 @@ class CreateRetrieveUpdateDestroyAPIView(
             return super().create(request, *args, **kwargs)
 
 
+# Survey
 class SurveyListCreateView(ListCreateAPIView):
     """ Show all or Create Survey
     """
@@ -80,6 +81,7 @@ class SurveyRUDView(RetrieveUpdateDestroyAPIView):
     queryset = Survey.objects.all()
 
 
+# Survey related
 class SurveyQuestionsListCreateView(ListCreateAPIView):
     """ Show all or Create Question for survey
     """
@@ -100,22 +102,55 @@ class SurveyStartView(CreateAPIView):
     queryset = Form.objects.all()
 
 
-class FormAnswerListView(ListAPIView):
-    """ Show all answers of current form
+# Question
+class QuestionListView(ListAPIView):
+    """ All questions
     """
-    permission_classes = (IsAuthenticated, IsAdminUser)
+    permission_classes = (IsAdminUser, )
 
-    serializer_class = FormAnswerSerializer
-    queryset = FormAnswer.objects.all()
+    serializer_class = QuestionSerializer
+    queryset = Question.objects.all()
 
 
-class FormAnswerRUDView(RetrieveUpdateDestroyAPIView):
-    """ Change answer
+class QuestionRUDView(RetrieveUpdateDestroyAPIView):
+    """ Change question
     """
-    serializer_class = FormAnswerSerializer
-    queryset = FormAnswer.objects.all()
+    permission_classes = (IsAdminUser, )
+
+    serializer_class = QuestionSerializer
+    queryset = Question.objects.all()
 
 
+# Question related
+class QuestionAnswersListCreateView(ListCreateAPIView):
+    """ Question answers
+    """
+    permission_classes = (IsAdminUser, )
+
+    serializer_class = AnswerSerializer
+    queryset = Answer.objects.all()
+
+
+# Answer
+class AnswerListView(ListAPIView):
+    """ All questions
+    """
+    permission_classes = (IsAdminUser, )
+
+    serializer_class = AnswerSerializer
+    queryset = Answer.objects.all()
+
+
+class AnswerRUDView(RetrieveUpdateDestroyAPIView):
+    """ Change question
+    """
+    permission_classes = (IsAdminUser, )
+
+    serializer_class = AnswerSerializer
+    queryset = Answer.objects.all()
+
+
+# Form
 class FormListView(ListCreateAPIView):
     """ Show all forms
     """
@@ -132,6 +167,7 @@ class FormRetrieveView(RetrieveAPIView):
     queryset = Form.objects.all()
 
 
+# Form related
 class FormRespondent(CreateRetrieveUpdateDestroyAPIView):
     """ Create or change respondent
     """
@@ -186,4 +222,21 @@ class SubmitFormView(UpdateAPIView):
     """
     serializer_class = SubmitFormSerializer
     queryset = Form.objects.all()
+
+
+# FormAnswer
+class FormAnswerListView(ListAPIView):
+    """ Show all answers to form
+    """
+    permission_classes = (IsAuthenticated, IsAdminUser)
+
+    serializer_class = FormAnswerSerializer
+    queryset = FormAnswer.objects.all()
+
+
+class FormAnswerRUDView(RetrieveUpdateDestroyAPIView):
+    """ Change form answer
+    """
+    serializer_class = FormAnswerSerializer
+    queryset = FormAnswer.objects.all()
 
