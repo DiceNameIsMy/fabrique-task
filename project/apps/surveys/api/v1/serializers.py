@@ -119,6 +119,7 @@ class FormCreateSerizlier(serializers.ModelSerializer):
             )
         return attrs
 
+
 class FormSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form
@@ -145,42 +146,49 @@ class FormAnswerSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         # TODO improve this ass long validation
-        form = attrs.get('form') or getattr(self.instance, 'form')
-        question = attrs.get('question') or getattr(self.instance, 'question')
+        if self.instance:
+            # if we are updating add instance fields
+            obj_attrs = {
+                'form': self.instance.form,
+                'question': self.instance.question, 
+                'choice': self.instance.choice,
+                'choices': self.instance.choices.all()
+            }
+            obj_attrs.update(attrs)
+            attrs = obj_attrs
 
-        if form.submitted:
-            raise serializers.ValidationError(
-                'form is already submitted'
-            )
-        if form.survey != question.survey:
+        question = attrs.get('question')
+
+        if attrs.get('form').survey != question.survey:
             raise serializers.ValidationError(
                 'answer to question should be in survey'
             )
 
-        text = attrs.get('text') or getattr(self.instance, 'text')
-        choice = attrs.get('choice') or getattr(self.instance, 'choice')
-        if self.instance:
-            choices = self.instance.choices.all()
-        else:
-            choices = attrs.get('choices')
-
         if question.type == Question.TEXT:
-           self.validate_text_type(attrs, text)
+           self.validate_text_type(attrs)
         elif question.type == Question.CHOICE:
-            self.validate_choice_type(attrs, choice)
+            self.validate_choice_type(attrs)
         elif question.type == Question.CHECKBOX:
-            self.validate_choices_type(attrs, choices)
+            self.validate_choices_type(attrs)
         
         return attrs
 
+    def validate_form(self, form):
+        if form.submitted:
+            raise serializers.ValidationError(
+                'form is already submitted'
+            )
 
-    def validate_text_type(self, attrs, text):
-        if not text:
+    def validate_text_type(self, attrs):
+        self.validate_fields_are_empty(attrs, ['choice', 'choices'])
+        if not attrs.get('text'):
             raise serializers.ValidationError(
                 '`text` field is required' 
             )
             
-    def validate_choice_type(self, attrs, choice):
+    def validate_choice_type(self, attrs):
+        self.validate_fields_are_empty(attrs, ['text', 'choices'])
+        choice = attrs.get('choice')
         question = attrs.get('question') or getattr(self.instance, 'question')
         if not choice:
             raise serializers.ValidationError(
@@ -191,17 +199,25 @@ class FormAnswerSerializer(serializers.ModelSerializer):
                 '`choice` should be in question choices' 
             )
 
-    def validate_choices_type(self, attrs, choices):
-        question = attrs.get('question') or getattr(self.instance, 'question')
+    def validate_choices_type(self, attrs):
+        self.validate_fields_are_empty(attrs, ['text', 'choice'])
+        choices = attrs.get('choices')
         if not choices:
             raise serializers.ValidationError(
                 '`choices` field is required' 
             )
-        if set(choices) - set(question.answers.all()):
+
+        question = attrs.get('question') or getattr(self.instance, 'question')
+        not_allowed_choices = set(choices) - set(question.answers.all())
+        if not_allowed_choices:
             raise serializers.ValidationError(
-                '`choices` should be in question choices' 
+                f'`choices` should be in question choices. Unwanted answers: {list(map(lambda obj: obj.pk, not_allowed_choices))}' 
             )
 
+    def validate_fields_are_empty(self, attrs: dict, empty_fields: list):
+        for field in empty_fields:
+            if attrs.get(field):
+                raise serializers.ValidationError(f'`{field}` is not allowed to be provided')
 
 
 class FormAnswerCreateSerializer(FormAnswerSerializer):
@@ -225,7 +241,14 @@ class FormAnswerCreateSerializer(FormAnswerSerializer):
 
         data = data.copy()
         data['form'] = view.kwargs[lookup_field]
-        return super().to_internal_value(data)
+        data = super().to_internal_value(data).copy()
+
+        # For some reason passing UUID str to data before 
+        # turning values to objects returns it as None so
+        # I added form object after transformation
+        data['form'] = Form.objects.get(pk=view.kwargs[lookup_field])
+        
+        return data
 
 
 class SubmitFormSerializer(serializers.ModelSerializer):
