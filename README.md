@@ -11,5 +11,5 @@
 2. update .env variables and `docker-compose.prod.yml` if you want
 2. run `docker-compose -f docker-compose.prod.yml up --build`
 
-### Docs are located at `/docs/`
+### Docs are located at `schema/docs/`
 

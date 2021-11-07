@@ -11,7 +11,7 @@ class Survey(models.Model):
     # FK questions 
     # FK forms
 
-    def is_active(self):
+    def is_active(self) -> bool:
         current_time = timezone.now()
         return (
             self.start_date <= current_time and
