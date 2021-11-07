@@ -125,4 +125,7 @@ SIMPLE_JWT = {
 # Docs
 SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': '/api/v[0-9]',
+    "SWAGGER_UI_SETTINGS": {
+        "displayOperationId": True,
+    },
 }
